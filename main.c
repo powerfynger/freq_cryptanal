@@ -25,6 +25,7 @@ void recomend_change();
 void roll_back();
 void auto_change();
 void clean_stdin();
+void print_cryptograph();
 
 int main(){
     char choice;
@@ -51,16 +52,7 @@ int main(){
             getchar();
             break;
         case '3':
-            printf("%ls\n", versions[curr_version]);
-            printf("\n| Было  | Стало |\n");
-            printf("|-------|-------|\n");
-            if(curr_version != 0){
-                for(int i = 1; i <= curr_version; i++){
-                    printf("|   %lc   |   %lc   |\n", last_change[i][0], last_change[i][1]);
-                }
-            }
-            printf("|-------|-------|\n");
-            printf("Нажмите enter, чтобы продолжить.");
+            print_cryptograph();
             getchar();
             break;
         case '4':
@@ -71,6 +63,7 @@ int main(){
             break;
         case '6':
             recomend_change();
+            printf("Нажмите enter, чтобы продолжить.");
             getchar();
             break;
         case '7':
@@ -169,6 +162,8 @@ int comp_w_uncrypt(const void *val1, const void *val2){
 }
 
 void print_words_by_len(){
+    // letter_add = change[2];
+    // letter_remove = change[0];
     int i;
     wchar_t words[MAX_WORDS_COUNT][MAX_WORD_LEN];
     wchar_t line[MAX_LEN];
@@ -242,8 +237,7 @@ void change_letter(){
     int i;
     wcscpy(versions[curr_version+1],versions[curr_version]);
     printf("%ls\n\n", versions[curr_version]);
-    printf("Через пробел введите сначала букву, которую надо заменить, затем её замену или \"0 0 \"для отмены:\n");
-    // clean_stdin();
+    printf("Через пробел введите сначала букву, которую надо заменить, затем её замену или \"0 0\"для отмены:\n");
     scanf("%lc %lc", &letter_remove, &letter_add);
     if(letter_add == 48 && letter_remove == 48){
         return;
@@ -255,6 +249,7 @@ void change_letter(){
         getchar();
         return;
         }
+    curr_version++;
     for(i = 0; versions[curr_version][i];i++){
         if(versions[curr_version][i] == letter_remove){ 
             versions[curr_version][i] = letter_add - 32;// -32 для получения верхнего регистра
@@ -262,7 +257,6 @@ void change_letter(){
     }
     last_change[curr_version][0] = letter_remove;
     last_change[curr_version][1] = letter_add;
-    curr_version++;
     printf("Нажмите enter, чтобы продолжить");
     getchar();
     getchar();
@@ -333,11 +327,10 @@ void recomend_change(){
         if(max == 0) continue;
         while(freq_top[rus_freq[index_rus_freq] - 32 - 1040] != 0) index_rus_freq++;
         if(rus_freq[index_rus_freq] == last_change) index_rus_freq++;
-        //printf("Буква: %lc, частота: %lf, рекомендуемая замена: %lc\n",max_index+1072, (double)max/i, rus_freq[index_rus_freq]);
+        printf("Буква: %lc, частота: %lf, рекомендуемая замена: %lc\n",max_index+1072, (double)max/i, rus_freq[index_rus_freq]);
         freq[max_index] = 0;
         last_change = rus_freq[index_rus_freq];
     }
-    getchar();
 }
 
 int is_letter(const wchar_t letter){
@@ -345,4 +338,17 @@ int is_letter(const wchar_t letter){
         return 1;
     }
     return 0;
+}
+
+void print_cryptograph(){
+    printf("%ls\n", versions[curr_version]);
+    printf("\n| Было  | Стало |  Шаг  |\n");
+    printf("|-------|-------|-------|\n");
+    if(curr_version != 0){
+        for(int i = 1; i <= curr_version; i++){
+            printf("|   %lc   |   %lc   |   %d   |\n", last_change[i][0], last_change[i][1], i);
+        }
+    }
+    printf("|-------|-------|-------|\n");
+    printf("Нажмите enter, чтобы продолжить.");
 }

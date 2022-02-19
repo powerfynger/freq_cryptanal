@@ -7,11 +7,11 @@
 const wchar_t* rus_freq = L"оеаинтсрвлкмдпуяыьгзбчйхжшюцщэфъё";
 
 wchar_t versions[MAX_BACK_UPS][MAX_LEN] = {'\0'};
+wchar_t last_change_list[MAX_BACK_UPS][2] = {L'\0'};
 int curr_version = 0;
-wchar_t last_change[MAX_BACK_UPS][2] = {L'\0'};
 
-char safe_input();
 wchar_t safe_input_wchar();
+char safe_input();
 int amount_uncrypt_letters(const wchar_t *word);
 int comp_w(const void *val1, const void *val2);
 int comp_w_uncrypt(const void *val1, const void *val2);
@@ -127,7 +127,7 @@ void print_help_message(){
 void roll_back(){
     int change;
     printf("Текущий шаг %d, последнее изменение с %lc на %lc\n\
-Введите число шагов, на которое нужно вернуться: ", curr_version, last_change[curr_version][0], last_change[curr_version][1]);
+Введите число шагов, на которое нужно вернуться: ", curr_version, last_change_list[curr_version][0], last_change_list[curr_version][1]);
     scanf("%d", &change);
     getchar();
     if(change >= curr_version){
@@ -255,8 +255,8 @@ void change_letter(){
             versions[curr_version][i] = letter_add - 32;// -32 для получения верхнего регистра
         }
     }
-    last_change[curr_version][0] = letter_remove;
-    last_change[curr_version][1] = letter_add;
+    last_change_list[curr_version][0] = letter_remove;
+    last_change_list[curr_version][1] = letter_add;
     printf("Нажмите enter, чтобы продолжить");
     getchar();
     getchar();
@@ -272,11 +272,9 @@ void auto_change(){
         if(versions[curr_version][i] >= 1072 && versions[curr_version][i] <= 1103){
             freq[versions[curr_version][i] - 1072]++;
         }
-        if(versions[curr_version][i] >= 1040 && versions[curr_version][i] <= 1071){
-            freq_top[versions[curr_version][i] - 1040]++;
-        }
     }
-   for(int j = 0; j < 33; j++){
+
+    for(int j = 0; j < 33; j++){
         int max = -1;
         int max_index = -1;
         for(int k = 0; k < 33; k++){
@@ -287,17 +285,24 @@ void auto_change(){
         }
         int index_rus_freq = j;
         if(max == 0) continue;
-        while(freq_top[rus_freq[index_rus_freq] - 32 - 1040] != 0) index_rus_freq++;
-        if(rus_freq[index_rus_freq] == last_change) index_rus_freq++;
+        while(freq_top[rus_freq[index_rus_freq] - 32 - 1040] != 0){
+            index_rus_freq++;
+        }
+        if(rus_freq[index_rus_freq] == last_change){
+            index_rus_freq++;
+        }
+        wcscpy(versions[curr_version+1],versions[curr_version]);
+        curr_version++;
         for(z = 0; versions[curr_version][z];z++){
-            
             if(versions[curr_version][z] == max_index+1072){ 
                 versions[curr_version][z] = rus_freq[index_rus_freq] - 32;// -32 для получения верхнего регистра
             }
         }
+        last_change_list[curr_version][0] = max_index+1072;
+        last_change_list[curr_version][1] = rus_freq[index_rus_freq] - 32;
         freq[max_index] = 0;
         last_change = rus_freq[index_rus_freq];
-        }
+    }
         printf("%ls\nНажмите enter, чтобы продолжить.", versions[curr_version]);
 }
 
@@ -346,9 +351,9 @@ void print_cryptograph(){
     printf("|-------|-------|-------|\n");
     if(curr_version != 0){
         for(int i = 1; i <= curr_version; i++){
-            printf("|   %lc   |   %lc   |   %d   |\n", last_change[i][0], last_change[i][1], i);
+            printf("|   %lc   |   %lc   |   %d   |\n", last_change_list[i][0], last_change_list[i][1], i);
         }
     }
-    printf("|-------|-------|-------|\n");
+    printf("|-------|-------|--------|\n");
     printf("Нажмите enter, чтобы продолжить.");
 }
